@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // Các API chính
-//app.use("/auth", require("./src/routes/auth"));
+app.use("/auth", require("./src/routes/auth"));
 app.use("/menu", require("./src/routes/menu"));
 app.use("/orders", require("./src/routes/orders"));
 app.use("/payment", require("./src/routes/payment"));
