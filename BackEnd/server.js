@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ⭐ Thêm Swagger UI
+// Thêm Swagger UI
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -19,6 +19,7 @@ app.use("/orders", require("./src/routes/orders"));
 app.use("/payment", require("./src/routes/payment"));
 app.use("/category", require("./src/routes/category"));
 app.use("/restaurant", require("./src/routes/restaurant"));
+app.use("/admin", require("./src/routes/adminRoute"));
 
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
