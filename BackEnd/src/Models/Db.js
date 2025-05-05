@@ -11,6 +11,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  ssl: { rejectUnauthorized: true }, // 🔐 Bắt buộc với Clever Cloud
 });
 
 pool.getConnection((err, connection) => {
