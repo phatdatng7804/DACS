@@ -19,7 +19,7 @@ app.use("/orders", require("./src/routes/orders"));
 app.use("/payment", require("./src/routes/payment"));
 app.use("/category", require("./src/routes/category"));
 app.use("/restaurant", require("./src/routes/restaurant"));
-app.use("/admin", require("./src/routes/adminRoute"));
+app.use("/admin", require("./src/routes/admin"));
 
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
