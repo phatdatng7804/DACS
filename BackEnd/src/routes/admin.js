@@ -59,5 +59,4 @@ router.post(
   requireRole(["admin"]),
   adminController.createUserWithRole
 );
-
 module.exports = router;
