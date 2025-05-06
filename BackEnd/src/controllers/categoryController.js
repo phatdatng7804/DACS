@@ -1,4 +1,5 @@
 const db = require("../Models/Db");
+
 exports.getAllCategories = async (req, res) => {
   try {
     const [rows] = await db.execute(
