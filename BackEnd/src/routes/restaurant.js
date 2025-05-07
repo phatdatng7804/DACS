@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const { verifyToken } = require("../middleware/auth");
+const { requireRole } = require("../middleware/role");
 const rc = require("../controllers/restaurantController");
 
 /**
@@ -12,7 +14,7 @@ const rc = require("../controllers/restaurantController");
  *       200:
  *         description: Lấy menu thành công
  */
-router.get("/menu", rc.getAllMenu);
+router.get("/menu", verifyToken, requireRole(["restaurant"]), rc.getAllMenu);
 /**
  * @swagger
  * /restaurant/menu:
@@ -52,7 +54,7 @@ router.get("/menu", rc.getAllMenu);
  *       200:
  *         description: Thêm món thành công
  */
-router.post("/menu", rc.addMenuItem);
+router.post("/menu", verifyToken, requireRole(["restaurant"]), rc.addMenuItem);
 /**
  * @swagger
  * /restaurant/menu/{id}:
@@ -95,7 +97,12 @@ router.post("/menu", rc.addMenuItem);
  *       200:
  *         description: Sửa món thành công
  */
-router.put("/menu/:id", rc.updateMenuItem);
+router.put(
+  "/menu/:id",
+  verifyToken,
+  requireRole(["restaurant"]),
+  rc.updateMenuItem
+);
 /**
  * @swagger
  * /restaurant/menu/{id}:
@@ -113,6 +120,11 @@ router.put("/menu/:id", rc.updateMenuItem);
  *       200:
  *         description: Xoá món thành công
  */
-router.delete("/menu/:id", rc.deleteMenuItem);
+router.delete(
+  "/menu/:id",
+  verifyToken,
+  requireRole(["restaurant"]),
+  rc.deleteMenuItem
+);
 
 module.exports = router;

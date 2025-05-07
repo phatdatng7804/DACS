@@ -1,4 +1,6 @@
 const db = require("../Models/Db");
+const { verifyToken } = require("../middleware/auth");
+const { requireRole } = require("../middleware/role");
 
 exports.getAllMenu = async (req, res) => {
   try {
@@ -16,61 +18,72 @@ exports.getAllMenu = async (req, res) => {
   }
 };
 
-exports.addMenuItem = async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    image_url,
-    category_id,
-    available = true,
-  } = req.body;
-  try {
-    const [result] = await db.execute(
-      "INSERT INTO menu_items (name, description, price, image_url, category_id, available) VALUES (?, ?, ?, ?, ?, ?)",
-      [name, description, price, image_url, category_id, available]
-    );
-    res.json({ message: "Thêm món ăn thành công", id: result.insertId });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Thêm món không thành công", error: err.message });
-  }
-};
-
+exports.addMenuItem = [
+  verifyToken,
+  requireRole(["restaurant"]),
+  async (req, res) => {
+    const {
+      name,
+      description,
+      price,
+      image_url,
+      category_id,
+      available = true,
+    } = req.body;
+    const status = "pending";
+    try {
+      const [result] = await db.execute(
+        "INSERT INTO menu_items (name, description, price, image_url, category_id, available, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [name, description, price, image_url, category_id, available, status]
+      );
+      res.json({ message: "Thêm món ăn thành công", id: result.insertId });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "Thêm món không thành công", error: err.message });
+    }
+  },
+];
 // Sửa món ăn
-exports.updateMenuItem = async (req, res) => {
-  const { id } = req.params;
-  const {
-    name,
-    description,
-    price,
-    image_url,
-    category_id,
-    available = true,
-  } = req.body;
-  try {
-    await db.execute(
-      "UPDATE menu_items SET name = ?, description = ?, price = ?, image_url = ?, category_id = ?, available = ? WHERE id = ?",
-      [name, description, price, image_url, category_id, available, id]
-    );
-    res.json({ message: "Cập nhật món ăn thành công" });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Cập nhật món không thành công", error: err.message });
-  }
-};
-
+exports.updateMenuItem = [
+  verifyToken,
+  requireRole(["restaurant"]),
+  async (req, res) => {
+    const { id } = req.params;
+    const {
+      name,
+      description,
+      price,
+      image_url,
+      category_id,
+      available = true,
+    } = req.body;
+    try {
+      await db.execute(
+        "UPDATE menu_items SET name = ?, description = ?, price = ?, image_url = ?, category_id = ?, available = ? WHERE id = ?",
+        [name, description, price, image_url, category_id, available, id]
+      );
+      res.json({ message: "Cập nhật món ăn thành công" });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "Cập nhật món không thành công", error: err.message });
+    }
+  },
+];
 // xóa món ăn
-exports.deleteMenuItem = async (req, res) => {
-  const { id } = req.params;
-  try {
-    await db.execute("DELETE FROM menu_items WHERE id = ?", [id]);
-    res.json({ message: "Xóa món ăn thành công" });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Xóa món không thành công", error: err.message });
-  }
-};
+exports.deleteMenuItem = [
+  verifyToken,
+  requireRole(["restaurant"]),
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      await db.execute("DELETE FROM menu_items WHERE id = ?", [id]);
+      res.json({ message: "Xóa món ăn thành công" });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "Xóa món không thành công", error: err.message });
+    }
+  },
+];

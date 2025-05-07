@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-
+const { verifyToken } = require("../middleware/auth");
+const { requireRole } = require("../middleware/role");
 const {
   getAllCategories,
   addCategory,
@@ -18,7 +19,6 @@ const {
  *         description: Lấy danh sách category thành công
  */
 router.get("/", getAllCategories);
-
 /**
  * @swagger
  * /category:
@@ -41,8 +41,7 @@ router.get("/", getAllCategories);
  *       200:
  *         description: Thêm category thành công
  */
-router.post("/", addCategory);
-
+router.post("/", verifyToken, requireRole(["restaurant"]), addCategory);
 /**
  * @swagger
  * /category/{id}:
@@ -72,8 +71,7 @@ router.post("/", addCategory);
  *       200:
  *         description: Cập nhật category thành công
  */
-router.put("/:id", updateCategory);
-
+router.put("/:id", verifyToken, requireRole(["restaurant"]), updateCategory);
 /**
  * @swagger
  * /category/{id}:
@@ -91,5 +89,5 @@ router.put("/:id", updateCategory);
  *       200:
  *         description: Xoá category thành công
  */
-router.delete("/:id", deleteCategory);
+router.delete("/:id", verifyToken, requireRole(["restaurant"]), deleteCategory);
 module.exports = router;

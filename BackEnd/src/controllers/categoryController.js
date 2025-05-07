@@ -1,5 +1,6 @@
 const db = require("../Models/Db");
-
+const { verifyToken } = require("../middleware/auth");
+const { requireRole } = require("../middleware/role");
 exports.getAllCategories = async (req, res) => {
   try {
     const [rows] = await db.execute(
@@ -14,6 +15,13 @@ exports.getAllCategories = async (req, res) => {
 };
 // Thêm vào loại mới
 exports.addCategory = async (req, res) => {
+  // Kiểm tra quyền của người dùng
+  if (req.user.role !== "restaurant") {
+    return res
+      .status(403)
+      .json({ message: "Bạn không có quyền thêm danh mục" });
+  }
+
   const { name } = req.body;
   if (!name)
     return res
@@ -36,6 +44,11 @@ exports.addCategory = async (req, res) => {
 };
 // sửa loại sản phẩm
 exports.updateCategory = async (req, res) => {
+  // Kiểm tra quyền của người dùng
+  if (req.user.role !== "restaurant") {
+    return res.status(403).json({ message: "Bạn không có quyền sửa danh mục" });
+  }
+
   const { id } = req.params;
   const { name } = req.body;
   if (!name)
@@ -56,6 +69,11 @@ exports.updateCategory = async (req, res) => {
 
 // Xóa loại sản phẩm
 exports.deleteCategory = async (req, res) => {
+  // Kiểm tra quyền của người dùng
+  if (req.user.role !== "restaurant") {
+    return res.status(403).json({ message: "Bạn không có quyền xóa danh mục" });
+  }
+
   const { id } = req.params;
   try {
     await db.execute("DELETE FROM categories WHERE id = ?", [id]);

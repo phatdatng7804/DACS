@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 exports.createUserWithRole = async (req, res) => {
   const { name, email, phone, password, role } = req.body;
 
-  if (!["admin", "staff"].includes(role)) {
+  if (!["admin", "restaurant"].includes(role)) {
     return res.status(400).json({ message: "Role không hợp lệ" });
   }
 
