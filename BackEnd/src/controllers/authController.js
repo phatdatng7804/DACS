@@ -9,9 +9,16 @@ exports.register = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Đăng ký người dùng vào bảng users
     const [result] = await db.execute(
       "INSERT INTO users (name, email, phone, password, role) VALUES (?, ?, ?, ?, ?)",
       [name, email, phone, hashedPassword, "customer"]
+    );
+
+    // Thêm thông tin vào bảng userInfo với tên, số điện thoại đã nhập
+    await db.execute(
+      "INSERT INTO userInfo (user_id, name, phone, address, gender) VALUES (?, ?, ?, ?, ?)",
+      [result.insertId, name, phone, null, null] // Địa chỉ và giới tính sẽ được cập nhật sau
     );
 
     res.json({ message: "Đăng ký thành công", userId: result.insertId });
@@ -66,5 +73,23 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Đăng nhập thất bại", error: err.message });
+  }
+};
+exports.updateUserInfo = async (req, res) => {
+  const { userId, address, gender } = req.body;
+
+  try {
+    // Cập nhật thông tin trong bảng userInfo
+    await db.execute(
+      "UPDATE userInfo SET address = ?, gender = ? WHERE user_id = ?",
+      [address, gender, userId]
+    );
+
+    res.json({ message: "Thông tin đã được cập nhật" });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Cập nhật thông tin thất bại", error: err.message });
   }
 };

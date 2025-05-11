@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { register, login } = require("../controllers/authController");
+const {
+  register,
+  login,
+  updateUserInfo,
+} = require("../controllers/authController");
 /**
  * @swagger
  * /auth/register:
@@ -63,5 +67,22 @@ router.post("/register", register);
  *         description: Đăng nhập thành công
  */
 router.post("/login", login);
-
+/**
+ * @swagger
+ * /auth/update-user-info:
+ *   patch:
+ *     summary: Cập nhật thông tin người dùng
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               address:
+ *                 type: string
+ *                 example: 123 Đường ABC, Quận 1, TP.HCM
+ */
+router.patch("/update-user-info", updateUserInfo);
 module.exports = router;
