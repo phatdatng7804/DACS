@@ -6,6 +6,13 @@ const bcrypt = require("bcryptjs");
 exports.register = async (req, res) => {
   const { name, email, phone, password } = req.body;
 
+  // Kiểm tra các trường bắt buộc
+  if (!name || !email || !phone || !password) {
+    return res
+      .status(400)
+      .json({ message: "Vui lòng nhập đầy đủ thông tin đăng ký" });
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -15,10 +22,10 @@ exports.register = async (req, res) => {
       [name, email, phone, hashedPassword, "customer"]
     );
 
-    // Thêm thông tin vào bảng userInfo với tên, số điện thoại đã nhập
+    // Thêm thông tin vào bảng userInfo
     await db.execute(
       "INSERT INTO userInfo (user_id, name, phone, address, gender) VALUES (?, ?, ?, ?, ?)",
-      [result.insertId, name, phone, null, null] // Địa chỉ và giới tính sẽ được cập nhật sau
+      [result.insertId, name, phone, null, null]
     );
 
     res.json({ message: "Đăng ký thành công", userId: result.insertId });
