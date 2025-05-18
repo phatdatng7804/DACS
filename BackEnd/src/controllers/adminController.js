@@ -19,7 +19,41 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách người dùng" });
   }
 };
+exports.createUserWithRole = async (req, res) => {
+  const { name, email, phone, password, role } = req.body;
 
+  // Kiểm tra role hợp lệ
+  if (!["admin", "staff", "customer", "restaurant"].includes(role)) {
+    return res.status(400).json({ message: "Role không hợp lệ" });
+  }
+
+  // Kiểm tra các trường bắt buộc
+  if (!name || !email || !phone || !password) {
+    return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+  }
+
+  try {
+    // Mã hóa password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Thêm user vào DB
+    const [result] = await db.execute(
+      `INSERT INTO users (name, email, phone, password, role)
+       VALUES (?, ?, ?, ?, ?)`,
+      [name, email, phone, hashedPassword, role]
+    );
+
+    res.status(201).json({
+      message: `Tạo tài khoản ${role} thành công`,
+      userId: result.insertId,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Lỗi khi tạo người dùng", error: error.message });
+  }
+};
 // Xóa người dùng theo id
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
