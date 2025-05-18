@@ -21,7 +21,7 @@ app.use("/category", require("./src/routes/category"));
 app.use("/restaurant", require("./src/routes/restaurant"));
 app.use("/admin", require("./src/routes/admin"));
 app.use("/cart", require("./src/routes/cart"));
-app.use("/reports", require("./src/routes/report"));
+app.use("/reports", require("./src/routes/reports"));
 
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
