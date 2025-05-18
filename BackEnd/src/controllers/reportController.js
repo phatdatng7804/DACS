@@ -1,4 +1,6 @@
-// reportController.js
+const db = require("../Models/Db");
+const { verifyToken } = require("../middleware/auth");
+
 exports.createReport = async (req, res) => {
   const { reported_by, target_type, target_id, reason } = req.body;
 
