@@ -1,4 +1,5 @@
 const db = require("../Models/Db");
+const moment = require("moment");
 
 exports.createOrder = async (req, res) => {
   const { customer_id, items, order_type, delivery_address, payment_method } =
@@ -21,6 +22,7 @@ exports.createOrder = async (req, res) => {
   }
 
   try {
+    // Tạo đơn hàng mới
     const [result] = await db.execute(
       "INSERT INTO orders (customer_id, order_type, delivery_address, status, total_amount, payment_method, is_paid) VALUES (?, ?, ?, 'pending', ?, ?, 0)",
       [customer_id, order_type, delivery_address, total_amount, payment_method]
@@ -35,12 +37,25 @@ exports.createOrder = async (req, res) => {
       );
     }
 
+    // Cập nhật bảng statistics
+    const today = moment().format("YYYY-MM-DD");
+
+    await db.execute(
+      `INSERT INTO statistics (date, total_orders, total_revenue)
+       VALUES (?, 1, ?)
+       ON DUPLICATE KEY UPDATE
+         total_orders = total_orders + 1,
+         total_revenue = total_revenue + VALUES(total_revenue)`,
+      [today, total_amount]
+    );
+
     res.json({ message: "Đặt món thành công", orderId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Đặt món thất bại", error: err.message });
   }
 };
+
 exports.updateOrderStatus = async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
