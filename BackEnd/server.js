@@ -22,7 +22,7 @@ app.use("/restaurant", require("./src/routes/restaurant"));
 app.use("/admin", require("./src/routes/admin"));
 app.use("/cart", require("./src/routes/cart"));
 app.use("/reports", require("./src/routes/reports"));
-
+app.use("/orderRes", require("./src/routes/orderRes"));
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
   cors: {

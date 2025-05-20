@@ -101,3 +101,33 @@ exports.updateOrderStatus = async (req, res) => {
     });
   }
 };
+exports.getAllOrders = async (req, res) => {
+  try {
+    const [orders] = await db.execute(`
+      SELECT 
+        o.id AS order_id,
+        o.customer_id,
+        u.name AS customer_name,
+        o.order_type,
+        o.delivery_address,
+        o.status,
+        o.total_amount,
+        o.payment_method,
+        o.is_paid,
+        o.created_at
+      FROM orders o
+      JOIN users u ON o.customer_id = u.id
+      ORDER BY o.created_at DESC
+    `);
+
+    res.json({ orders });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({
+        message: "Không thể lấy danh sách đơn hàng",
+        error: err.message,
+      });
+  }
+};
