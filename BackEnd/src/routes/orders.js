@@ -43,9 +43,6 @@ const { createOrder } = require("../controllers/ordersController");
  *                     quantity:
  *                       type: integer
  *                       example: 2
- *                     price:
- *                       type: number
- *                       example: 45000
  *               order_type:
  *                 type: string
  *                 example: "delivery"

@@ -2,9 +2,7 @@ const db = require("../Models/Db");
 const moment = require("moment");
 
 exports.createOrder = async (req, res) => {
-  const { customer_id, items, order_type, delivery_address, payment_method } =
-    req.body;
-
+  const customer_id = req.user.id;
   if (
     !customer_id ||
     !order_type ||
