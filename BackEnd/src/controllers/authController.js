@@ -83,20 +83,20 @@ exports.login = async (req, res) => {
   }
 };
 exports.updateUserInfo = async (req, res) => {
-  const { userId, address, gender } = req.body;
+  const { userId, address, gender, name } = req.body;
 
   try {
-    // Cập nhật thông tin trong bảng userInfo
     await db.execute(
-      "UPDATE userInfo SET address = ?, gender = ? WHERE user_id = ?",
-      [address, gender, userId]
+      "UPDATE userInfo SET address = ?, gender = ?, name = ? WHERE user_id = ?",
+      [address, gender, name, userId]
     );
 
-    res.json({ message: "Thông tin đã được cập nhật" });
+    res.json({ message: "Thông tin đã được cập nhật thành công" });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ message: "Cập nhật thông tin thất bại", error: err.message });
+    res.status(500).json({
+      message: "Cập nhật thông tin thất bại",
+      error: err.message,
+    });
   }
 };
