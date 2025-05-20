@@ -5,42 +5,63 @@ exports.createOrder = async (req, res) => {
   const { customer_id, items, order_type, delivery_address, payment_method } =
     req.body;
 
-  // Kiểm tra đầu vào
-  if (!customer_id || !order_type || !payment_method || !Array.isArray(items)) {
-    return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+  if (
+    !customer_id ||
+    !order_type ||
+    !payment_method ||
+    !Array.isArray(items) ||
+    items.length === 0
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Thiếu thông tin bắt buộc hoặc danh sách món trống" });
   }
 
-  // Tính tổng số tiền
-  const total_amount = items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-
-  // Kiểm tra số lượng món ăn hợp lệ
-  if (total_amount <= 0) {
-    return res.status(400).json({ message: "Tổng số tiền không hợp lệ" });
-  }
+  const connection = await db.getConnection();
+  await connection.beginTransaction();
 
   try {
-    // Tạo đơn hàng mới
-    const [result] = await db.execute(
+    let total_amount = 0;
+    const detailedItems = [];
+
+    for (const item of items) {
+      const [menuRows] = await connection.execute(
+        "SELECT price FROM menu_items WHERE id = ?",
+        [item.menu_item_id]
+      );
+
+      if (menuRows.length === 0) {
+        await connection.rollback();
+        return res
+          .status(400)
+          .json({ message: `Món ăn ID ${item.menu_item_id} không tồn tại` });
+      }
+
+      const unitPrice = menuRows[0].price;
+      const itemTotal = unitPrice * item.quantity;
+      total_amount += itemTotal;
+
+      detailedItems.push({
+        ...item,
+        price: unitPrice,
+      });
+    }
+
+    const [result] = await connection.execute(
       "INSERT INTO orders (customer_id, order_type, delivery_address, status, total_amount, payment_method, is_paid) VALUES (?, ?, ?, 'pending', ?, ?, 0)",
       [customer_id, order_type, delivery_address, total_amount, payment_method]
     );
     const orderId = result.insertId;
 
-    // Thêm món ăn vào bảng order_items
-    for (let item of items) {
-      await db.execute(
+    for (let item of detailedItems) {
+      await connection.execute(
         "INSERT INTO order_items (order_id, menu_item_id, quantity, price) VALUES (?, ?, ?, ?)",
         [orderId, item.menu_item_id, item.quantity, item.price]
       );
     }
 
-    // Cập nhật bảng statistics
     const today = moment().format("YYYY-MM-DD");
-
-    await db.execute(
+    await connection.execute(
       `INSERT INTO statistics (date, total_orders, total_revenue)
        VALUES (?, 1, ?)
        ON DUPLICATE KEY UPDATE
@@ -49,10 +70,14 @@ exports.createOrder = async (req, res) => {
       [today, total_amount]
     );
 
+    await connection.commit();
     res.json({ message: "Đặt món thành công", orderId });
   } catch (err) {
+    await connection.rollback();
     console.error(err);
     res.status(500).json({ message: "Đặt món thất bại", error: err.message });
+  } finally {
+    connection.release();
   }
 };
 
@@ -123,11 +148,9 @@ exports.getAllOrders = async (req, res) => {
     res.json({ orders });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({
-        message: "Không thể lấy danh sách đơn hàng",
-        error: err.message,
-      });
+    res.status(500).json({
+      message: "Không thể lấy danh sách đơn hàng",
+      error: err.message,
+    });
   }
 };
