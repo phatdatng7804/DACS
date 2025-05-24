@@ -4,13 +4,7 @@ const cors = require("cors");
 const http = require("http");
 
 const app = express();
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Thay đổi nếu frontend đã deploy
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 // Thêm Swagger UI
