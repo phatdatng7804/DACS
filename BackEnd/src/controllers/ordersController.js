@@ -3,6 +3,7 @@ const moment = require("moment");
 
 exports.createOrder = async (req, res) => {
   const customer_id = req.user.id;
+  const { order_type, payment_method, items, delivery_address } = req.body;
   if (
     !customer_id ||
     !order_type ||
