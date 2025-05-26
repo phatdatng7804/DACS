@@ -101,9 +101,9 @@ exports.vnpayReturn = async (req, res) => {
       [orderId]
     );
 
-    res.send("✅ Thanh toán thành công qua VNPAY, đơn hàng đã xác nhận");
+    res.send(" Thanh toán thành công qua VNPAY, đơn hàng đã xác nhận");
   } catch (error) {
     console.error(error);
-    res.status(500).send("❌ Lỗi xử lý phản hồi VNPAY");
+    res.status(500).send(" Lỗi xử lý phản hồi VNPAY");
   }
 };

@@ -1,0 +1,36 @@
+const db = require("../Models/Db");
+
+exports.getBestSellingItemOfMonth = async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+         oi.menu_item_id,
+         m.name AS menu_name,
+         SUM(oi.quantity) AS quantity_sold
+       FROM order_items oi
+       JOIN orders o ON oi.order_id = o.id
+       JOIN menu_items m ON oi.menu_item_id = m.id
+       WHERE MONTH(o.order_time) = MONTH(CURRENT_DATE())
+         AND YEAR(o.order_time) = YEAR(CURRENT_DATE())
+         AND o.status != 'cancelled'
+       GROUP BY oi.menu_item_id
+       ORDER BY quantity_sold DESC
+       LIMIT 1`
+    );
+
+    if (rows.length === 0) {
+      return res.json({
+        message: "Không có dữ liệu món bán ra trong tháng này",
+        best_seller: null,
+      });
+    }
+
+    res.json({ best_seller: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Lỗi khi thống kê món bán chạy",
+      error: err.message,
+    });
+  }
+};

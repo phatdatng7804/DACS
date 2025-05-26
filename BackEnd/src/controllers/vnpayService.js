@@ -33,9 +33,16 @@ exports.createVnpayUrl = ({ amount, orderId, orderDesc }) => {
   };
 
   vnp_Params = sortObject(vnp_Params);
-  const signData = qs.stringify(vnp_Params, { encode: false });
-  const hmac = crypto.createHmac("sha512", secretKey);
-  const secureHash = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
+
+  let querystring = require("qs");
+  let signData = querystring.stringify(vnp_Params, { encode: false });
+  let crypto = require("crypto");
+  let hmac = crypto.createHmac("sha512", secretKey);
+  let signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
+  vnp_Params["vnp_SecureHash"] = signed;
+  vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
+
+  res.redirect(vnpUrl);
 
   vnp_Params.vnp_SecureHash = secureHash;
   return `${vnpUrl}?${qs.stringify(vnp_Params, { encode: true })}`;
