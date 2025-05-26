@@ -3,7 +3,13 @@ const moment = require("moment");
 
 exports.createOrder = async (req, res) => {
   const customer_id = req.user.id;
-  const { order_type, payment_method, items, delivery_address } = req.body;
+  const {
+    order_type,
+    items,
+    delivery_address,
+    payment_method = "cod",
+  } = req.body;
+
   if (
     !customer_id ||
     !order_type ||
@@ -46,9 +52,19 @@ exports.createOrder = async (req, res) => {
       });
     }
 
+    // Xác định trạng thái thanh toán ban đầu
+    const isPaid = payment_method.toLowerCase() === "cod" ? 0 : 0; // thanh toán sau, xác nhận ở route riêng
+
     const [result] = await connection.execute(
-      "INSERT INTO orders (customer_id, order_type, delivery_address, status, total_amount, payment_method, is_paid) VALUES (?, ?, ?, 'pending', ?, ?, 0)",
-      [customer_id, order_type, delivery_address, total_amount, payment_method]
+      "INSERT INTO orders (customer_id, order_type, delivery_address, status, total_amount, payment_method, is_paid) VALUES (?, ?, ?, 'pending', ?, ?, ?)",
+      [
+        customer_id,
+        order_type,
+        delivery_address,
+        total_amount,
+        payment_method.toLowerCase(),
+        isPaid,
+      ]
     );
     const orderId = result.insertId;
 
@@ -70,7 +86,12 @@ exports.createOrder = async (req, res) => {
     );
 
     await connection.commit();
-    res.json({ message: "Đặt món thành công", orderId });
+
+    res.json({
+      message: "Đặt món thành công",
+      orderId,
+      payment_method: payment_method.toLowerCase(),
+    });
   } catch (err) {
     await connection.rollback();
     console.error(err);
@@ -79,7 +100,6 @@ exports.createOrder = async (req, res) => {
     connection.release();
   }
 };
-
 exports.updateOrderStatus = async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
