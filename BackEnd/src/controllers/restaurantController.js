@@ -5,16 +5,21 @@ const { requireRole } = require("../middleware/role");
 exports.getAllMenu = async (req, res) => {
   try {
     const [rows] = await db.execute(`
-      SELECT m.*, c.name AS category_name
+      SELECT 
+        m.id, m.name, m.description, m.price, 
+        m.image_url AS imageUrl, 
+        m.category_id, m.available, m.status, 
+        c.name AS category_name
       FROM menu_items m
       LEFT JOIN categories c ON m.category_id = c.id
       ORDER BY m.id DESC
     `);
     res.json(rows);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Lỗi khi lấy danh sách món ăn", error: err.message });
+    res.status(500).json({
+      message: "Lỗi khi lấy danh sách món ăn",
+      error: err.message,
+    });
   }
 };
 
