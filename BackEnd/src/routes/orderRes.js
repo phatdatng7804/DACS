@@ -54,7 +54,7 @@ const {
  *         description: Không tìm thấy đơn hàng
  */
 router.put(
-  "/:orderId/status",
+  "/:id/status",
   verifyToken,
   requireRole(["restaurant"]),
   updateOrderStatus
