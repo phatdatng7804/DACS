@@ -163,7 +163,7 @@ exports.getAllOrders = async (req, res) => {
       LEFT JOIN userInfo ui ON o.customer_id = ui.user_id
       ORDER BY o.order_time DESC
     `);
-    res.json({ orders });
+    res.json(orders); // Trả về trực tiếp mảng orders
   } catch (err) {
     console.error("Lỗi getAllOrders:", err.message);
     res.status(500).json({
