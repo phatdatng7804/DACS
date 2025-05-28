@@ -83,10 +83,10 @@ exports.deleteMenuItem = [
   async (req, res) => {
     const { id } = req.params;
     try {
-      // Xóa tất cả order_items liên quan trước
+      console.log("🧹 Đang xóa order_items chứa menu_item_id =", id);
       await db.execute("DELETE FROM order_items WHERE menu_item_id = ?", [id]);
 
-      // Sau đó xóa menu item
+      console.log("🗑️  Đang xóa menu_item_id =", id);
       const [result] = await db.execute("DELETE FROM menu_items WHERE id = ?", [
         id,
       ]);
@@ -99,7 +99,7 @@ exports.deleteMenuItem = [
 
       res.json({ message: "Đã xoá món ăn thành công" });
     } catch (err) {
-      console.error("Lỗi khi xoá món ăn:", err.message);
+      console.error(" Lỗi khi xoá món ăn:", err);
       res.status(500).json({
         message: "Xóa món không thành công",
         error: err.message,
