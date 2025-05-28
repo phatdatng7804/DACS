@@ -155,7 +155,7 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 exports.updateOrderStatus = async (req, res) => {
-  const { orderId } = req.params;
+  const { id } = req.params;
   const { status } = req.body;
 
   const validStatuses = [
@@ -181,7 +181,7 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const [result] = await db.execute(
       "UPDATE orders SET status = ? WHERE id = ?",
-      [status, orderId]
+      [status, id]
     );
 
     if (result.affectedRows === 0) {
