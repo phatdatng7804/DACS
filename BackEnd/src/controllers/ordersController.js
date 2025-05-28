@@ -113,7 +113,7 @@ exports.getAllOrders = async (req, res) => {
         o.total_amount,
         o.payment_method,
         o.is_paid,
-        o.created_at
+        o.order_time,
       FROM orders o
       JOIN users u ON o.customer_id = u.id
       ORDER BY o.created_at DESC
