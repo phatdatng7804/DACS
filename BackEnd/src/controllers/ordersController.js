@@ -100,6 +100,34 @@ exports.createOrder = async (req, res) => {
     connection.release();
   }
 };
+exports.getAllOrders = async (req, res) => {
+  try {
+    const [orders] = await db.execute(`
+      SELECT 
+        o.id AS order_id,
+        o.customer_id,
+        u.name AS customer_name,
+        o.order_type,
+        o.delivery_address,
+        o.status,
+        o.total_amount,
+        o.payment_method,
+        o.is_paid,
+        o.created_at
+      FROM orders o
+      JOIN users u ON o.customer_id = u.id
+      ORDER BY o.created_at DESC
+    `);
+
+    res.json({ orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Không thể lấy danh sách đơn hàng",
+      error: err.message,
+    });
+  }
+};
 exports.updateOrderStatus = async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
@@ -141,33 +169,6 @@ exports.updateOrderStatus = async (req, res) => {
     console.error(err);
     res.status(500).json({
       message: "Lỗi khi cập nhật trạng thái đơn hàng",
-      error: err.message,
-    });
-  }
-};
-exports.getAllOrders = async (req, res) => {
-  try {
-    const [orders] = await db.execute(`
-      SELECT 
-        o.id AS order_id,
-        o.customer_id,
-        ui.name AS customer_name,
-        o.order_type,
-        ui.address AS delivery_address,  -- sửa lấy từ userInfo.address
-        o.status,
-        o.total_amount,
-        o.payment_method,
-        o.is_paid,
-        o.order_time
-      FROM orders o
-      LEFT JOIN userInfo ui ON o.customer_id = ui.user_id
-      ORDER BY o.order_time DESC
-    `);
-    res.json(orders);
-  } catch (err) {
-    console.error("Lỗi getAllOrders:", err.message);
-    res.status(500).json({
-      message: "Không thể lấy danh sách đơn hàng",
       error: err.message,
     });
   }
