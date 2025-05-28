@@ -116,7 +116,7 @@ exports.getAllOrders = async (req, res) => {
         o.order_time,
       FROM orders o
       JOIN users u ON o.customer_id = u.id
-      ORDER BY o.created_at DESC
+      ORDER BY o.order_time DESC
     `);
 
     res.json({ orders });
