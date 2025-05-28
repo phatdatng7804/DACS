@@ -158,12 +158,11 @@ exports.getAllOrders = async (req, res) => {
         o.total_amount,
         o.payment_method,
         o.is_paid,
-        o.created_at
+        o.order_time
       FROM orders o
-      JOIN userInfo ui ON o.customer_id = ui.user_id
-      ORDER BY o.created_at DESC
+      LEFT JOIN userInfo ui ON o.customer_id = ui.user_id
+      ORDER BY o.order_time DESC
     `);
-
     res.json({ orders });
   } catch (err) {
     console.error("Lỗi getAllOrders:", err.message);

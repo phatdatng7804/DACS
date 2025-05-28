@@ -82,11 +82,15 @@ exports.deleteMenuItem = [
   requireRole(["restaurant"]),
   async (req, res) => {
     const { id } = req.params;
+
     try {
-      console.log("🧹 Đang xóa order_items chứa menu_item_id =", id);
+      console.log("🧹 Đang xoá cart_items chứa menu_item_id =", id);
+      await db.execute("DELETE FROM cart_items WHERE menu_item_id = ?", [id]);
+
+      console.log("🧹 Đang xoá order_items chứa menu_item_id =", id);
       await db.execute("DELETE FROM order_items WHERE menu_item_id = ?", [id]);
 
-      console.log("🗑️  Đang xóa menu_item_id =", id);
+      console.log("🗑️ Đang xoá menu_item_id =", id);
       const [result] = await db.execute("DELETE FROM menu_items WHERE id = ?", [
         id,
       ]);
