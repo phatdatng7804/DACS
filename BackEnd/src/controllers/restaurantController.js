@@ -63,16 +63,55 @@ exports.updateMenuItem = [
       category_id,
       available = true,
     } = req.body;
+
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
     try {
-      await db.execute(
-        "UPDATE menu_items SET name = ?, description = ?, price = ?, image_url = ?, category_id = ?, available = ? WHERE id = ?",
+      // Cập nhật món ăn
+      const [updateResult] = await connection.execute(
+        `UPDATE menu_items 
+         SET name = ?, description = ?, price = ?, image_url = ?, category_id = ?, available = ? 
+         WHERE id = ?`,
         [name, description, price, image_url, category_id, available, id]
       );
-      res.json({ message: "Cập nhật món ăn thành công" });
+
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return res
+          .status(404)
+          .json({ message: "Không tìm thấy món ăn để cập nhật" });
+      }
+
+      // Lấy lại thông tin món ăn kèm tên category
+      const [rows] = await connection.execute(
+        `SELECT m.*, c.name AS category_name 
+         FROM menu_items m 
+         LEFT JOIN categories c ON m.category_id = c.id
+         WHERE m.id = ?`,
+        [id]
+      );
+
+      await connection.commit();
+
+      if (rows.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "Không tìm thấy món ăn sau khi cập nhật" });
+      }
+
+      res.json({
+        message: "Cập nhật món ăn thành công",
+        menuItem: rows[0],
+      });
     } catch (err) {
-      res
-        .status(500)
-        .json({ message: "Cập nhật món không thành công", error: err.message });
+      await connection.rollback();
+      res.status(500).json({
+        message: "Cập nhật món không thành công",
+        error: err.message,
+      });
+    } finally {
+      connection.release();
     }
   },
 ];
