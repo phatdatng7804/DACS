@@ -11,7 +11,7 @@ exports.getAllMenu = async (req, res) => {
         m.category_id, m.available, m.status, 
         c.name AS category_name
       FROM menu_items m
-      LEFT JOIN category c ON m.category_id = c.id
+      LEFT JOIN categories c ON m.category_id = c.id
       ORDER BY m.id DESC
     `);
     res.json(rows);
@@ -69,7 +69,6 @@ exports.updateMenuItem = [
     await connection.beginTransaction();
 
     try {
-      // Cập nhật món ăn
       const [updateResult] = await connection.execute(
         `UPDATE menu_items 
          SET name = ?, description = ?, price = ?, image_url = ?, category_id = ?, available = ? 
@@ -84,11 +83,10 @@ exports.updateMenuItem = [
           .json({ message: "Không tìm thấy món ăn để cập nhật" });
       }
 
-      // Lấy lại món ăn sau khi cập nhật, kèm tên category
       const [rows] = await connection.execute(
         `SELECT m.*, c.name AS category_name 
          FROM menu_items m 
-         LEFT JOIN category c ON m.category_id = c.id
+         LEFT JOIN categories c ON m.category_id = c.id
          WHERE m.id = ?`,
         [id]
       );
