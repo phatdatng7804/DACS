@@ -151,7 +151,7 @@ exports.getAllOrders = async (req, res) => {
       SELECT 
         o.id AS order_id,
         o.customer_id,
-        u.name AS customer_name,
+        ui.name AS customer_name,
         o.order_type,
         o.delivery_address,
         o.status,
@@ -160,13 +160,13 @@ exports.getAllOrders = async (req, res) => {
         o.is_paid,
         o.created_at
       FROM orders o
-      JOIN users u ON o.customer_id = u.id
+      JOIN userInfo ui ON o.customer_id = ui.user_id
       ORDER BY o.created_at DESC
     `);
 
     res.json({ orders });
   } catch (err) {
-    console.error(err);
+    console.error("Lỗi getAllOrders:", err.message);
     res.status(500).json({
       message: "Không thể lấy danh sách đơn hàng",
       error: err.message,
