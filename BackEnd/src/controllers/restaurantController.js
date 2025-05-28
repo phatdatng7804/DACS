@@ -11,7 +11,7 @@ exports.getAllMenu = async (req, res) => {
         m.category_id, m.available, m.status, 
         c.name AS category_name
       FROM menu_items m
-      LEFT JOIN categories c ON m.category_id = c.id
+      LEFT JOIN category c ON m.category_id = c.id
       ORDER BY m.id DESC
     `);
     res.json(rows);
@@ -36,6 +36,7 @@ exports.addMenuItem = [
       available = true,
     } = req.body;
     const status = "pending";
+
     try {
       const [result] = await db.execute(
         "INSERT INTO menu_items (name, description, price, image_url, category_id, available, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -49,7 +50,7 @@ exports.addMenuItem = [
     }
   },
 ];
-// Sửa món ăn
+
 exports.updateMenuItem = [
   verifyToken,
   requireRole(["restaurant"]),
@@ -83,11 +84,11 @@ exports.updateMenuItem = [
           .json({ message: "Không tìm thấy món ăn để cập nhật" });
       }
 
-      // Lấy lại thông tin món ăn kèm tên category
+      // Lấy lại món ăn sau khi cập nhật, kèm tên category
       const [rows] = await connection.execute(
         `SELECT m.*, c.name AS category_name 
          FROM menu_items m 
-         LEFT JOIN categories c ON m.category_id = c.id
+         LEFT JOIN category c ON m.category_id = c.id
          WHERE m.id = ?`,
         [id]
       );
@@ -115,7 +116,7 @@ exports.updateMenuItem = [
     }
   },
 ];
-// xóa món ăn
+
 exports.deleteMenuItem = [
   verifyToken,
   requireRole(["restaurant"]),
@@ -123,13 +124,11 @@ exports.deleteMenuItem = [
     const { id } = req.params;
 
     try {
-      console.log("🧹 Đang xoá cart_items chứa menu_item_id =", id);
+      // Xóa các món liên quan trong bảng khác trước (nếu có)
       await db.execute("DELETE FROM cart_items WHERE menu_item_id = ?", [id]);
-
-      console.log("🧹 Đang xoá order_items chứa menu_item_id =", id);
       await db.execute("DELETE FROM order_items WHERE menu_item_id = ?", [id]);
 
-      console.log("🗑️ Đang xoá menu_item_id =", id);
+      // Xóa món chính
       const [result] = await db.execute("DELETE FROM menu_items WHERE id = ?", [
         id,
       ]);
@@ -142,7 +141,7 @@ exports.deleteMenuItem = [
 
       res.json({ message: "Đã xoá món ăn thành công" });
     } catch (err) {
-      console.error(" Lỗi khi xoá món ăn:", err);
+      console.error("Lỗi khi xoá món ăn:", err);
       res.status(500).json({
         message: "Xóa món không thành công",
         error: err.message,
