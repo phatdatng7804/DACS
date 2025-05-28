@@ -102,6 +102,7 @@ exports.createOrder = async (req, res) => {
 };
 exports.getAllOrders = async (req, res) => {
   try {
+    // Lấy danh sách đơn hàng
     const [orders] = await db.execute(`
       SELECT 
         o.id AS order_id,
@@ -119,7 +120,32 @@ exports.getAllOrders = async (req, res) => {
       ORDER BY o.order_time DESC
     `);
 
-    res.json({ orders });
+    // Lấy các món cho tất cả đơn hàng từ order_items và menu_items
+    const [items] = await db.execute(`
+      SELECT 
+        oi.order_id,
+        oi.menu_item_id,
+        m.name AS menu_item_name,
+        m.price,
+        oi.quantity
+      FROM order_items oi
+      JOIN menu_items m ON oi.menu_item_id = m.id
+    `);
+
+    // Gắn items vào từng order
+    const ordersWithItems = orders.map((order) => ({
+      ...order,
+      items: items
+        .filter((item) => item.order_id === order.order_id)
+        .map((item) => ({
+          id: item.menu_item_id,
+          name: item.menu_item_name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+    }));
+
+    res.json({ orders: ordersWithItems });
   } catch (err) {
     console.error(err);
     res.status(500).json({
