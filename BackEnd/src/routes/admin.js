@@ -192,54 +192,6 @@ router.get(
   requireRole(["admin"]),
   adminController.getPendingReviews
 );
-/**
- * @swagger
- * /api/admin/reviews/{id}:
- *   patch:
- *     summary: Duyệt hoặc từ chối đánh giá món ăn
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID đánh giá cần duyệt/từ chối
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - status
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [approved, rejected]
- *                 example: approved
- *     responses:
- *       200:
- *         description: Đánh giá đã được duyệt hoặc từ chối
- *       400:
- *         description: Trạng thái không hợp lệ
- *       401:
- *         description: Không có token đăng nhập
- *       403:
- *         description: Token không hợp lệ hoặc không phải admin
- *       404:
- *         description: Đánh giá không tồn tại
- *       500:
- *         description: Lỗi server khi cập nhật đánh giá
- */
-router.patch(
-  "/reviews/:id",
-  verifyToken,
-  requireRole(["admin"]),
-  adminController.reviewApproveOrReject
-);
 router.patch(
   "/menu-items/:id/status",
   verifyToken,

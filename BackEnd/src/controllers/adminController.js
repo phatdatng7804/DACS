@@ -72,43 +72,20 @@ exports.deleteUser = async (req, res) => {
 // Lấy danh sách đánh giá đang chờ duyệt
 exports.getPendingReviews = async (req, res) => {
   try {
-    const [reviews] = await db.execute(
-      `SELECT r.id, r.content, r.rating, r.status, r.created_at, u.name AS userName, m.name AS menuItemName
-      FROM reviews r
-      JOIN users u ON r.user_id = u.id
-      JOIN menu_items m ON r.menu_item_id = m.id
-      WHERE r.status = 'pending'
-      ORDER BY r.created_at DESC`
+    const [items] = await db.execute(
+      `SELECT m.id, m.name, m.description, m.price, m.image_url, m.category_id, m.available, m.status, c.name AS category_name
+       FROM menu_items m
+       LEFT JOIN categories c ON m.category_id = c.id
+       WHERE m.status = 'pending'
+       ORDER BY m.created_at DESC`
     );
-    res.json({ reviews });
+    res.json({ items });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Lỗi khi lấy đánh giá" });
+    res.status(500).json({ message: "Lỗi khi lấy danh sách món ăn chờ duyệt" });
   }
 };
 
-// Duyệt hoặc từ chối đánh giá
-exports.reviewApproveOrReject = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body; // status = 'approved' hoặc 'rejected'
-  if (!["approved", "rejected"].includes(status))
-    return res.status(400).json({ message: "Trạng thái không hợp lệ" });
-
-  try {
-    const [result] = await db.execute(
-      "UPDATE reviews SET status = ? WHERE id = ?",
-      [status, id]
-    );
-
-    if (result.affectedRows === 0)
-      return res.status(404).json({ message: "Đánh giá không tồn tại" });
-
-    res.json({ message: `Đánh giá đã được ${status}` });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Lỗi khi cập nhật đánh giá" });
-  }
-};
 // Duyệt hoặc từ chối món ăn
 exports.updateMenuItemStatus = async (req, res) => {
   const { id } = req.params;
@@ -117,13 +94,23 @@ exports.updateMenuItemStatus = async (req, res) => {
     return res.status(400).json({ message: "Trạng thái không hợp lệ" });
 
   try {
+    // Lấy trạng thái hiện tại
+    const [rows] = await db.execute(
+      "SELECT status FROM menu_items WHERE id = ?",
+      [id]
+    );
+    if (rows.length === 0)
+      return res.status(404).json({ message: "Món ăn không tồn tại" });
+
+    if (rows[0].status !== "pending")
+      return res
+        .status(400)
+        .json({ message: "Chỉ được duyệt/từ chối món ăn đang chờ duyệt" });
+
     const [result] = await db.execute(
       "UPDATE menu_items SET status = ? WHERE id = ?",
       [status, id]
     );
-    if (result.affectedRows === 0)
-      return res.status(404).json({ message: "Món ăn không tồn tại" });
-
     res.json({ message: `Món ăn đã được cập nhật: ${status}` });
   } catch (err) {
     console.error(err);
