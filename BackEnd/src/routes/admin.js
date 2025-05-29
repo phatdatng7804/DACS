@@ -192,6 +192,55 @@ router.get(
   requireRole(["admin"]),
   adminController.getPendingReviews
 );
+/**
+ * @swagger
+ * /api/admin/menu-items/{id}/status:
+ *   patch:
+ *     summary: Duyệt hoặc từ chối món ăn (chỉ admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID món ăn cần cập nhật trạng thái
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [approved, rejected]
+ *                 example: approved
+ *     responses:
+ *       200:
+ *         description: Cập nhật trạng thái món ăn thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Trạng thái không hợp lệ hoặc món ăn không ở trạng thái chờ duyệt
+ *       401:
+ *         description: Không có token đăng nhập
+ *       403:
+ *         description: Token không hợp lệ hoặc không phải admin
+ *       404:
+ *         description: Món ăn không tồn tại
+ *       500:
+ *         description: Lỗi server khi cập nhật trạng thái món ăn
+ */
 router.patch(
   "/menu-items/:id/status",
   verifyToken,
