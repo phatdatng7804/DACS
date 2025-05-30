@@ -2,14 +2,21 @@ const db = require("../Models/Db");
 const bcrypt = require("bcryptjs");
 
 exports.getUsers = async (req, res) => {
-  const { role } = req.query; // role = 'customer' hoặc 'restaurant' hoặc 'admin'...
+  const { role } = req.query;
   try {
     let sql = "SELECT id, name, email, phone, role FROM users";
     const params = [];
 
     if (role) {
-      sql += " WHERE role = ?";
-      params.push(role);
+      if (role.includes(",")) {
+        const roles = role.split(",").map((r) => r.trim());
+        const placeholders = roles.map(() => "?").join(",");
+        sql += ` WHERE role IN (${placeholders})`;
+        params.push(...roles);
+      } else {
+        sql += " WHERE role = ?";
+        params.push(role);
+      }
     }
 
     const [users] = await db.execute(sql, params);
