@@ -59,7 +59,7 @@ exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
     // Xóa tất cả order của user trước
-    await db.execute("DELETE FROM orders WHERE user_id = ?", [id]);
+    await db.execute("DELETE FROM orders WHERE customer_id = ?", [id]);
     // Sau đó xóa user
     const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
     if (result.affectedRows === 0)
