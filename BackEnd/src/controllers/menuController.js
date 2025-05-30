@@ -3,7 +3,7 @@ const db = require("../Models/Db");
 exports.getMenu = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      "SELECT * FROM menu_items WHERE available = 1 AND status = 'approved'"
+      "SELECT * FROM menu_items WHERE status = 'approved'"
     );
     res.json(rows);
   } catch (err) {
