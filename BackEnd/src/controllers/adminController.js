@@ -58,6 +58,9 @@ exports.createUserWithRole = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
+    // Xóa tất cả order của user trước
+    await db.execute("DELETE FROM orders WHERE user_id = ?", [id]);
+    // Sau đó xóa user
     const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
     if (result.affectedRows === 0)
       return res.status(404).json({ message: "Người dùng không tồn tại" });
@@ -65,7 +68,9 @@ exports.deleteUser = async (req, res) => {
     res.json({ message: "Xóa người dùng thành công" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Lỗi khi xóa người dùng" });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi xóa người dùng", error: err.message });
   }
 };
 
