@@ -1,11 +1,12 @@
+const db = require("../Models/Db");
+
 exports.getBestSellingItemOfMonth = async (req, res) => {
   try {
     const [rows] = await db.execute(
       `SELECT 
          oi.menu_item_id,
          m.name AS menu_name,
-         SUM(oi.quantity) AS quantity_sold,
-         SUM(oi.quantity * m.price) AS total_revenue
+         SUM(oi.quantity) AS quantity_sold
        FROM order_items oi
        JOIN orders o ON oi.order_id = o.id
        JOIN menu_items m ON oi.menu_item_id = m.id
