@@ -105,6 +105,11 @@ router.put(
  *       403:
  *         description: Không có quyền truy cập
  */
-router.get("/", verifyToken, requireRole(["restaurant"]), getAllOrders);
+router.get(
+  "/",
+  verifyToken,
+  requireRole(["restaurant", "admin"]),
+  getAllOrders
+);
 
 module.exports = router;
