@@ -58,6 +58,7 @@ exports.createUserWithRole = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
+    await db.execute("DELETE FROM cart_items WHERE customer_id = ?", [id]);
     // Xóa tất cả order của user trước
     await db.execute("DELETE FROM orders WHERE customer_id = ?", [id]);
     // Sau đó xóa user
