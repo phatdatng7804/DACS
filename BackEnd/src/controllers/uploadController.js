@@ -23,7 +23,7 @@ const uploadImage = (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "Chưa chọn file ảnh" });
     }
-    const imageUrl = `/uploads/${req.file.filename}`;
+    const imageUrl = `https://dacs-u2d2.onrender.com/uploads/${req.file.filename}`;
     return res.json({ url: imageUrl });
   } catch (error) {
     console.error("Lỗi upload ảnh:", error);
