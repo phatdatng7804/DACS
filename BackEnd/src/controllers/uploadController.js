@@ -27,3 +27,7 @@ const uploadImage = (req, res) => {
     return res.status(500).json({ message: "Lỗi server khi upload ảnh" });
   }
 };
+module.exports = {
+  upload,
+  uploadImage,
+};
