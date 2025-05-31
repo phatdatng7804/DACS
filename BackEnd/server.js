@@ -6,7 +6,7 @@ const http = require("http");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+app.use(express.static("public"));
 // Thêm Swagger UI
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
@@ -24,6 +24,7 @@ app.use("/cart", require("./src/routes/cart"));
 app.use("/reports", require("./src/routes/reports"));
 app.use("/orderRes", require("./src/routes/orderRes"));
 app.use("/statistics", require("./src/routes/statistics"));
+app.use("/upload", require("./src/routes/upload"));
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
   cors: {

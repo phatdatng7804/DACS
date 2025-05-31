@@ -1,0 +1,29 @@
+const multer = require("multer");
+const path = require("path");
+
+// Cấu hình lưu ảnh
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+// Khởi tạo multer upload middleware
+const upload = multer({ storage });
+
+// Controller xử lý upload
+const uploadImage = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "Chưa chọn file ảnh" });
+  }
+  const imageUrl = `/uploads/${req.file.filename}`;
+  return res.json({ url: imageUrl });
+};
+
+module.exports = {
+  upload,
+  uploadImage,
+};
