@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {
-  getBestSellingItemOfMonth,
-} = require("../controllers/statisticsController");
+const { getStatisticsOfMonth } = require("../controllers/statisticsController");
 const { verifyToken } = require("../middleware/auth");
 const { requireRole } = require("../middleware/role");
 /**
@@ -46,7 +44,7 @@ router.get(
   "/best-seller",
   verifyToken,
   requireRole(["admin", "restaurant"]),
-  getBestSellingItemOfMonth
+  getStatisticsOfMonth
 );
 
 module.exports = router;
