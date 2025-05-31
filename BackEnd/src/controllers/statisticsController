@@ -1,8 +1,9 @@
 const db = require("../Models/Db");
 
-exports.getBestSellingItemOfMonth = async (req, res) => {
+exports.getStatisticsOfMonth = async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    // Lấy món bán chạy nhất
+    const [bestSellerRows] = await db.execute(
       `SELECT 
          oi.menu_item_id,
          m.name AS menu_name,
@@ -19,18 +20,32 @@ exports.getBestSellingItemOfMonth = async (req, res) => {
        LIMIT 1`
     );
 
-    if (rows.length === 0) {
-      return res.json({
-        message: "Không có dữ liệu món bán ra trong tháng này",
-        best_seller: null,
-      });
-    }
+    // Lấy tổng doanh thu và tổng đơn hàng trong tháng
+    const [summaryRows] = await db.execute(
+      `SELECT 
+         COUNT(DISTINCT o.id) AS total_orders,
+         SUM(o.total_amount) AS total_revenue
+       FROM orders o
+       WHERE MONTH(o.order_time) = MONTH(CURRENT_DATE())
+         AND YEAR(o.order_time) = YEAR(CURRENT_DATE())
+         AND o.status != 'cancelled'`
+    );
 
-    res.json({ best_seller: rows[0] });
+    const bestSeller = bestSellerRows.length > 0 ? bestSellerRows[0] : null;
+    const summary =
+      summaryRows.length > 0
+        ? summaryRows[0]
+        : { total_orders: 0, total_revenue: 0 };
+
+    res.json({
+      best_seller: bestSeller,
+      total_orders: summary.total_orders || 0,
+      total_revenue: summary.total_revenue || 0,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Lỗi khi thống kê món bán chạy",
+      message: "Lỗi khi thống kê dữ liệu tháng",
       error: err.message,
     });
   }
