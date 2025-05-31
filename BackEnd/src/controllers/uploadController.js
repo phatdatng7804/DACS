@@ -16,14 +16,14 @@ const upload = multer({ storage });
 
 // Controller xử lý upload
 const uploadImage = (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "Chưa chọn file ảnh" });
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Chưa chọn file ảnh" });
+    }
+    const imageUrl = `/uploads/${req.file.filename}`;
+    return res.json({ url: imageUrl });
+  } catch (error) {
+    console.error("Lỗi upload ảnh:", error);
+    return res.status(500).json({ message: "Lỗi server khi upload ảnh" });
   }
-  const imageUrl = `/uploads/${req.file.filename}`;
-  return res.json({ url: imageUrl });
-};
-
-module.exports = {
-  upload,
-  uploadImage,
 };
