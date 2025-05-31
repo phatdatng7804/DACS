@@ -84,6 +84,27 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Đăng nhập thất bại", error: err.message });
   }
 };
+exports.getUserInfo = async (req, res) => {
+  const userId = req.user.id; // Lấy userId từ token
+
+  try {
+    const [rows] = await db.execute(
+      "SELECT user_id, name, phone, address, gender FROM userInfo WHERE user_id = ?",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+
+    res.json({ userInfo: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Lấy thông tin thất bại", error: err.message });
+  }
+};
 exports.updateUserInfo = async (req, res) => {
   const { userId, address, gender, name } = req.body;
 
